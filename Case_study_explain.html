@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Analytica Data Science Competition Guide</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        margin: 20px;
+        background-color: #f4f4f4;
+        color: #333;
+      }
+      .container {
+        max-width: 900px;
+        margin: auto;
+        background: #fff;
+        padding: 20px 40px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      h1,
+      h2,
+      h3 {
+        color: #2c3e50;
+      }
+      ul {
+        list-style-type: none;
+        padding: 0;
+      }
+      li {
+        background: #ecf0f1;
+        padding: 10px;
+        margin-bottom: 8px;
+        border-radius: 5px;
+      }
+      strong {
+        color: #2980b9;
+      }
+      code {
+        background-color: #e8e8e8;
+        padding: 2px 5px;
+        border-radius: 3px;
+      }
+      .note {
+        background-color: #fff3cd;
+        border-left: 5px solid #ffc107;
+        padding: 10px;
+        margin: 20px 0;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Analytica: A Guide to the Data Analysis Event</h1>
+      <p>
+        This document is a breakdown and roadmap for the Unstop "Analytica" data
+        science competition, based on our discussion.
+      </p>
+
+      <h2>🎯 The Core Problem</h2>
+      <p>
+        Your task is to analyze sales data from
+        <strong>Urban Grocers Pvt. Ltd.</strong> to evaluate the success of
+        their new market strategy. You'll use data to answer key business
+        questions and provide evidence-based recommendations to the management
+        team.
+      </p>
+
+      <h2>🗺️ Your Step-by-Step Roadmap</h2>
+      <ol>
+        <li>
+          <h3>1. Data Loading and Preparation</h3>
+          <ul>
+            <li>
+              <strong>Load the Data:</strong> Use a tool like pandas to read the
+              <code>Urban_Grocers.csv.xlsx</code> file.
+            </li>
+            <li>
+              <strong>Inspect and Clean:</strong> Convert the
+              <code>Date</code> column to a proper datetime format. Check for
+              and handle any missing values.
+            </li>
+          </ul>
+        </li>
+        <li>
+          <h3>2. Exploratory Data Analysis (EDA)</h3>
+          <ul>
+            <li>
+              <strong>Identify Peak Sales:</strong> Aggregate
+              <code>Units_Sold</code> by <code>Date</code> to find overall sales
+              trends and peak periods.
+            </li>
+            <li>
+              <strong>Analyze Holiday/Weekend Impact:</strong> Compare average
+              sales on holiday/weekend days (<code>Holiday_Weekend = 1</code>)
+              vs. regular days (<code>Holiday_Weekend = 0</code>). Do this for
+              overall sales and for each <code>Food_Category</code>.
+            </li>
+          </ul>
+        </li>
+        <li>
+          <h3>3. Answering Key Questions</h3>
+          <ul>
+            <li>
+              <strong>Unpredictable Demand:</strong> Group data by
+              <code>Store_ID</code> and calculate the standard deviation of
+              <code>Units_Sold</code>. The store with the highest standard
+              deviation is the most unpredictable.
+            </li>
+            <li>
+              <strong>Promotion Impact:</strong> Compare the average
+              <code>Units_Sold</code> when <code>Promotion = 1</code> versus
+              when <code>Promotion = 0</code>. This quantifies the effect of
+              promotions.
+            </li>
+          </ul>
+        </li>
+        <li>
+          <h3>4. Demand Patterns and Forecasting</h3>
+          <ul>
+            <li>
+              <strong>Analyze Patterns:</strong> Visualize sales trends for each
+              <code>Food_Category</code> and <code>Store_ID</code> to identify
+              specific demand patterns.
+            </li>
+            <li>
+              <strong>Forecast Demand:</strong> Choose a single food category.
+              Aggregate its sales by date and use a time-series model (like
+              ARIMA) to predict sales for the next quarter.
+            </li>
+          </ul>
+        </li>
+        <li>
+          <h3>5. Investment and Profitability Analysis</h3>
+          <ul>
+            <li>
+              <strong>The 14% Profit Margin:</strong> This is a fixed value
+              provided for the competition. It's the gross profit margin. You
+              use it to calculate the company's total profit.
+            </li>
+            <li>
+              <strong>Calculation:</strong>
+              <ol>
+                <li>
+                  Calculate <strong>Total Revenue</strong>:
+                  <code>Sum(Units_Sold * Price_per_Unit)</code> for all
+                  transactions.
+                </li>
+                <li>
+                  Calculate <strong>Total Profit</strong>:
+                  <code>Total Revenue * 0.14</code>.
+                </li>
+              </ol>
+            </li>
+            <li>
+              <strong>Investment Evaluation:</strong> Compare the
+              <strong>Total Profit</strong> to the initial investment of
+              <strong>₹20 crores</strong> to see if the company has recovered
+              its investment.
+            </li>
+          </ul>
+        </li>
+        <li>
+          <h3>6. Formulating Recommendations</h3>
+          <ul>
+            <li>
+              Based on all your analysis (peak sales, promotion impact,
+              unpredictable demand, and profit analysis), create a list of
+              actionable, data-driven strategies for Urban Grocers to improve
+              their business.
+            </li>
+          </ul>
+        </li>
+      </ol>
+    </div>
+  </body>
+</html>
