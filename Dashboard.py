@@ -8,7 +8,7 @@ from prophet import Prophet
 # -----------------------------
 @st.cache_data
 def load_data():
-    df = pd.read_excel("Urban_Grocers.csv.xlsx")  # replace with Excel if needed
+    df = pd.read_excel("Urban_Grocers.csv.xlsx")  # replace with your file
     df["Date"] = pd.to_datetime(df["Date"], dayfirst=True)
     df["Month"] = df["Date"].dt.to_period("M").dt.to_timestamp()
     df["Revenue"] = df["Units_Sold"] * df["Price_per_Unit"]
@@ -25,10 +25,10 @@ st.title("📊 Urban Grocers Case Study Dashboard")
 col1, col2, col3, col4 = st.columns(4)
 col1.metric("Total Revenue", f"₹{df['Revenue'].sum():,.0f}")
 col2.metric("Total Units Sold", f"{df['Units_Sold'].sum():,}")
-col3.metric("Avg Price per Unit", f"₹{df['Price_per_Unit'].mean():.2f}")
+col3.metric("Avg Price/Unit", f"₹{df['Price_per_Unit'].mean():.2f}")
 promo_sales = df[df["Promotion"] == 1]["Units_Sold"].sum()
 promo_pct = (promo_sales / df["Units_Sold"].sum()) * 100
-col4.metric("% Sales via Promotion", f"{promo_pct:.1f}%")
+col4.metric("Sales via Promotion", f"{promo_pct:.1f}%")
 
 st.markdown("---")
 
@@ -42,7 +42,7 @@ plot_type = st.sidebar.radio(
         "Overall Demand Trends",
         "Revenue Trends",
         "Category Performance",
-        "Top Selling Items per Category",
+        "Top Selling Categories",
         "Store Analysis",
         "Promotion Impact",
         "Holiday Effect",
@@ -69,20 +69,29 @@ elif plot_type == "Revenue Trends":
     st.plotly_chart(fig, use_container_width=True)
 
 elif plot_type == "Category Performance":
-    cat_df = df.groupby("Food_Category")[["Units_Sold", "Revenue"]].sum().reset_index()
-    fig = px.bar(cat_df, x="Food_Category", y=["Units_Sold", "Revenue"],
-                 barmode="group", title="Category-wise Performance")
+    metric = st.radio("Choose Metric", ["Units_Sold", "Revenue"], horizontal=True)
+    cat_df = df.groupby("Food_Category")[[metric]].sum().reset_index()
+    fig = px.bar(cat_df, x="Food_Category", y=metric,
+                 title=f"Category-wise {metric}", text_auto=True)
     st.plotly_chart(fig, use_container_width=True)
 
-elif plot_type == "Top Selling Items per Category":
-    top_items = df.groupby("Food_Category")["Units_Sold"].nlargest(5).reset_index()
-    st.write("🚀 Top Selling Items per Category")
-    st.dataframe(top_items)
+elif plot_type == "Top Selling Categories":
+    top_n = st.slider("Select Top N Categories", 3, 10, 5)
+    metric = st.radio("Choose Metric", ["Units_Sold", "Revenue"], horizontal=True)
+    cat_sales = df.groupby("Food_Category")[[metric]].sum().reset_index()
+    top_cats = cat_sales.sort_values(by=metric, ascending=False).head(top_n)
+    fig = px.bar(top_cats, x="Food_Category", y=metric,
+                 title=f"Top {top_n} Categories by {metric}", text_auto=True)
+    st.plotly_chart(fig, use_container_width=True)
+    # Pie chart as alternate view
+    fig2 = px.pie(top_cats, names="Food_Category", values=metric,
+                  title=f"Share of Top {top_n} Categories")
+    st.plotly_chart(fig2, use_container_width=True)
 
 elif plot_type == "Store Analysis":
     store_df = df.groupby("Store_ID")[["Units_Sold", "Revenue"]].sum().reset_index()
-    fig = px.bar(store_df, x="Store_ID", y=["Units_Sold", "Revenue"],
-                 barmode="group", title="Store-wise Sales & Revenue")
+    fig = px.bar(store_df, x="Store_ID", y="Revenue", text_auto=True,
+                 title="Store-wise Revenue")
     st.plotly_chart(fig, use_container_width=True)
 
 elif plot_type == "Promotion Impact":
@@ -125,7 +134,8 @@ elif plot_type == "Milk Demand Forecast":
         m.fit(milk_df)
         future = m.make_future_dataframe(periods=4, freq="M")
         forecast = m.predict(future)
-        fig = px.line(forecast, x="ds", y="yhat", title="Milk Demand Forecast (Next 4 Months)")
+        fig = px.line(forecast, x="ds", y="yhat",
+                      title="Milk Demand Forecast (Next 4 Months)")
         st.plotly_chart(fig, use_container_width=True)
     else:
         st.warning("⚠️ Not enough data for forecasting.")
