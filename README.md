@@ -59,7 +59,7 @@ To run this project locally, follow these steps:
     ```
 2.  Navigate to the project directory:
     ```bash
-    cd your-repository-name
+    cd Analatica-Case-Study
     ```
 3.  Install the required dependencies (assuming you use `pip`):
     ```bash
@@ -71,6 +71,6 @@ To run this project locally, follow these steps:
 
 ## 6. Author
 
-**[Your Name]**
-* **GitHub:** [Link to your GitHub profile]
-* **LinkedIn:** [Link to your LinkedIn profile]
+- [Anuj A](github.com/a-anuj)
+- [Jei Akash](github.com/jeiakash)
+- [Mithun VR](github.com/vrMithun)
