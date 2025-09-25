@@ -1,6 +1,7 @@
 import pandas as pd
 import streamlit as st
 import plotly.express as px
+import plotly.graph_objects as go
 from prophet import Prophet
 
 # -----------------------------
@@ -8,11 +9,11 @@ from prophet import Prophet
 # -----------------------------
 @st.cache_data
 def load_data():
-    df = pd.read_excel("Urban_Grocers.csv.xlsx")  # replace with your file
+    df = pd.read_excel("Urban_Grocers.csv.xlsx")
     df["Date"] = pd.to_datetime(df["Date"], dayfirst=True)
     df["Month"] = df["Date"].dt.to_period("M").dt.to_timestamp()
     df["Revenue"] = df["Units_Sold"] * df["Price_per_Unit"]
-    df["Profit"] = df["Revenue"] * 0.14  # assume 14% margin
+    df["Profit"] = df["Revenue"] * 0.14
     return df
 
 df = load_data()
@@ -44,12 +45,14 @@ plot_type = st.sidebar.radio(
         "Category Performance",
         "Top Selling Categories",
         "Store Analysis",
-        "Promotion Impact",
+        "Promotion Impact", # Single option for promotions
+        "Promotion vs. Price",
         "Holiday Effect",
         "Weather Impact",
         "Mode of Purchase",
         "Profitability",
-        "Milk Demand Forecast"
+        "Milk Demand Forecast",
+        "Investment Status"
     ]
 )
 
@@ -83,7 +86,6 @@ elif plot_type == "Top Selling Categories":
     fig = px.bar(top_cats, x="Food_Category", y=metric,
                  title=f"Top {top_n} Categories by {metric}", text_auto=True)
     st.plotly_chart(fig, use_container_width=True)
-    # Pie chart as alternate view
     fig2 = px.pie(top_cats, names="Food_Category", values=metric,
                   title=f"Share of Top {top_n} Categories")
     st.plotly_chart(fig2, use_container_width=True)
@@ -94,11 +96,47 @@ elif plot_type == "Store Analysis":
                  title="Store-wise Revenue")
     st.plotly_chart(fig, use_container_width=True)
 
+# Combined Promotion Impact Plots
 elif plot_type == "Promotion Impact":
-    promo_df = df.groupby("Promotion")[["Units_Sold", "Revenue"]].mean().reset_index()
-    promo_df["Promotion"] = promo_df["Promotion"].map({0: "No Promotion", 1: "Promotion"})
-    fig = px.bar(promo_df, x="Promotion", y=["Units_Sold", "Revenue"],
-                 barmode="group", title="Impact of Promotion on Sales & Revenue")
+    promotion_view = st.radio(
+        "Select Impact View",
+        ["Overall Impact", "Impact by Category"],
+        horizontal=True
+    )
+    
+    if promotion_view == "Overall Impact":
+        promo_df = df.groupby("Promotion")[["Units_Sold", "Revenue"]].mean().reset_index()
+        promo_df["Promotion"] = promo_df["Promotion"].map({0: "No Promotion", 1: "Promotion"})
+        fig = px.bar(promo_df, x="Promotion", y=["Units_Sold", "Revenue"],
+                     barmode="group", title="Overall Impact of Promotion on Sales & Revenue")
+        st.plotly_chart(fig, use_container_width=True)
+        
+    elif promotion_view == "Impact by Category":
+        promo_impact_df = df.pivot_table(index='Food_Category', columns='Promotion', values='Units_Sold', aggfunc='mean')
+        promo_impact_df.columns = ['No Promotion', 'Promotion']
+        promo_impact_df['Percentage_Change'] = (
+            (promo_impact_df['Promotion'] - promo_impact_df['No Promotion']) / promo_impact_df['No Promotion']
+        ) * 100
+        fig = px.bar(promo_impact_df.reset_index(), x='Food_Category', y='Percentage_Change', title='Promotion Impact by Food Category')
+        fig.update_yaxes(title='Percentage Change in Sales')
+        st.plotly_chart(fig, use_container_width=True)
+
+elif plot_type == "Promotion vs. Price":
+    promo_price_df = df.groupby(['Food_Category', 'Promotion'])['Price_per_Unit'].mean().reset_index()
+    promo_price_df["Promotion"] = promo_price_df["Promotion"].map({0: "No Promotion", 1: "Promotion"})
+    
+    fig = px.bar(
+        promo_price_df, 
+        x="Food_Category", 
+        y="Price_per_Unit", 
+        color="Promotion", 
+        barmode="group",
+        title="Average Price per Unit: Promotion vs. No Promotion",
+        labels={
+            "Price_per_Unit": "Average Price per Unit",
+            "Food_Category": "Food Category"
+        }
+    )
     st.plotly_chart(fig, use_container_width=True)
 
 elif plot_type == "Holiday Effect":
@@ -134,8 +172,28 @@ elif plot_type == "Milk Demand Forecast":
         m.fit(milk_df)
         future = m.make_future_dataframe(periods=4, freq="M")
         forecast = m.predict(future)
-        fig = px.line(forecast, x="ds", y="yhat",
-                      title="Milk Demand Forecast (Next 4 Months)")
+        
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=milk_df['ds'], y=milk_df['y'], mode='markers', name='Historical Sales'))
+        fig.add_trace(go.Scatter(x=forecast['ds'], y=forecast['yhat'], mode='lines', name='Forecasted Sales'))
+        fig.add_trace(go.Scatter(x=forecast['ds'], y=forecast['yhat_lower'], fill=None, mode='lines', line_color='rgba(0,0,0,0)', showlegend=False))
+        fig.add_trace(go.Scatter(x=forecast['ds'], y=forecast['yhat_upper'], fill='tonexty', mode='lines', line_color='rgba(0,0,0,0)', name='Confidence Interval'))
+        fig.update_layout(title='Milk Demand Forecast (Next 4 Months)', yaxis_title='Units Sold', showlegend=True)
+        
         st.plotly_chart(fig, use_container_width=True)
     else:
         st.warning("⚠️ Not enough data for forecasting.")
+
+elif plot_type == "Investment Status":
+    total_revenue = df['Revenue'].sum()
+    total_profit = df['Profit'].sum()
+    initial_investment = 200000000
+    shortfall = initial_investment - total_profit
+
+    st.header("Investment Status")
+    st.markdown("---")
+    
+    st.subheader(f"Total Profit: ₹{total_profit:,.2f}")
+    st.subheader(f"Initial Investment: ₹{initial_investment:,.2f}")
+    st.subheader(f"Remaining Shortfall: ₹{shortfall:,.2f}")
+    st.warning("⚠️ The company has a significant shortfall and has not yet recovered its initial investment.")
