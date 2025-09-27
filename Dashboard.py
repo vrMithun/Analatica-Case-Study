@@ -24,12 +24,25 @@ df = load_data()
 st.title("📊 Urban Grocers Case Study Dashboard")
 
 col1, col2, col3, col4 = st.columns(4)
-col1.metric("Total Revenue", f"₹{df['Revenue'].sum():,.0f}")
-col2.metric("Total Units Sold", f"{df['Units_Sold'].sum():,}")
-col3.metric("Avg Price/Unit", f"₹{df['Price_per_Unit'].mean():.2f}")
+
+total_revenue = f"₹{df['Revenue'].sum():,.2f}"
+total_units = f"{df['Units_Sold'].sum():,}"
+avg_price = f"₹{df['Price_per_Unit'].mean():.2f}"
 promo_sales = df[df["Promotion"] == 1]["Units_Sold"].sum()
 promo_pct = (promo_sales / df["Units_Sold"].sum()) * 100
-col4.metric("Sales via Promotion", f"{promo_pct:.1f}%")
+
+col1.write("**Total Revenue**")
+col1.write(total_revenue)
+
+col2.write("**Total Units Sold**")
+col2.write(total_units)
+
+col3.write("**Avg Price/Unit**")
+col3.write(avg_price)
+
+col4.write("**Sales via Promotion**")
+col4.write(f"{promo_pct:.1f}%")
+
 
 st.markdown("---")
 
