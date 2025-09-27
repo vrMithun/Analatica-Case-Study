@@ -45,13 +45,13 @@ plot_type = st.sidebar.radio(
         "Category Performance",
         "Top Selling Categories",
         "Store Analysis",
-        "Promotion Impact", # Single option for promotions
+        "Promotion Impact",
         "Promotion vs. Price",
         "Holiday Effect",
         "Weather Impact",
         "Mode of Purchase",
         "Profitability",
-        "Milk Demand Forecast",
+        "Food Category Demand Forecast",
         "Investment Status"
     ]
 )
@@ -96,7 +96,6 @@ elif plot_type == "Store Analysis":
                  title="Store-wise Revenue")
     st.plotly_chart(fig, use_container_width=True)
 
-# Combined Promotion Impact Plots
 elif plot_type == "Promotion Impact":
     promotion_view = st.radio(
         "Select Impact View",
@@ -164,30 +163,89 @@ elif plot_type == "Profitability":
                  title="Profit Contribution by Category", text_auto=True)
     st.plotly_chart(fig, use_container_width=True)
 
-elif plot_type == "Milk Demand Forecast":
-    milk_df = df[df["Food_Category"] == "Milk"].groupby("Month")["Units_Sold"].sum().reset_index()
-    milk_df = milk_df.rename(columns={"Month": "ds", "Units_Sold": "y"})
-    if len(milk_df) > 2:
-        m = Prophet()
-        m.fit(milk_df)
-        future = m.make_future_dataframe(periods=4, freq="M")
-        forecast = m.predict(future)
-        
+elif plot_type == "Food Category Demand Forecast":
+    st.subheader("📈 Food Category Demand Forecast")
+    
+    # Select Food Category
+    food_categories = df['Food_Category'].unique()
+    selected_cat = st.selectbox("Select Food Category for Forecast", food_categories)
+    
+    # Aggregate daily sales
+    cat_df = df[df['Food_Category'] == selected_cat][['Date', 'Units_Sold']].groupby('Date').sum().reset_index()
+    cat_df = cat_df.rename(columns={'Date': 'ds', 'Units_Sold': 'y'})
+    
+    if len(cat_df) > 2:
+        # Step 1: Fill missing Dec 21–31, 2024
+        model_dec = Prophet(daily_seasonality=True, yearly_seasonality=True, weekly_seasonality=True)
+        model_dec.fit(cat_df)
+        future_dec = model_dec.make_future_dataframe(periods=11, freq='D')
+        forecast_dec = model_dec.predict(future_dec)
+        dec_missing = forecast_dec.set_index('ds').loc['2024-12-21':'2024-12-31', ['yhat']].rename(columns={'yhat':'y'})
+        filled_cat_data = pd.concat([cat_df.set_index('ds'), dec_missing]).reset_index()
+
+        # Step 2: Retrain on completed dataset
+        model_final = Prophet(daily_seasonality=True, yearly_seasonality=True, weekly_seasonality=True)
+        model_final.fit(filled_cat_data.rename(columns={'index':'ds'}))
+
+        # Step 3: Forecast next 3 months (Jan–Mar 2025)
+        future_q1 = model_final.make_future_dataframe(periods=90, freq='D')
+        forecast_q1 = model_final.predict(future_q1)
+        forecast_future = forecast_q1[(forecast_q1['ds'] > '2024-12-31') & (forecast_q1['ds'] <= '2025-03-31')]
+
+        # Aggregate to monthly totals
+        forecast_monthly = forecast_future.set_index('ds').resample('M').sum()
+        # Format index for readability
+        forecast_monthly.index = forecast_monthly.index.strftime('%b %Y')
+
+        # Plot
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=milk_df['ds'], y=milk_df['y'], mode='markers', name='Historical Sales'))
-        fig.add_trace(go.Scatter(x=forecast['ds'], y=forecast['yhat'], mode='lines', name='Forecasted Sales'))
-        fig.add_trace(go.Scatter(x=forecast['ds'], y=forecast['yhat_lower'], fill=None, mode='lines', line_color='rgba(0,0,0,0)', showlegend=False))
-        fig.add_trace(go.Scatter(x=forecast['ds'], y=forecast['yhat_upper'], fill='tonexty', mode='lines', line_color='rgba(0,0,0,0)', name='Confidence Interval'))
-        fig.update_layout(title='Milk Demand Forecast (Next 4 Months)', yaxis_title='Units Sold', showlegend=True)
-        
+        # Historical monthly sales
+        hist_monthly = filled_cat_data.set_index('ds').resample('M').sum()
+        hist_monthly.index = hist_monthly.index.strftime('%b %Y')  # keep full history readable
+        fig.add_trace(go.Scatter(
+            x=hist_monthly.index, y=hist_monthly['y'], mode='markers', name='Historical Sales'
+        ))
+        # Forecast line
+        fig.add_trace(go.Scatter(
+            x=forecast_monthly.index, y=forecast_monthly['yhat'], mode='lines', name='Forecasted Sales'
+        ))
+        # Confidence interval
+        fig.add_trace(go.Scatter(
+            x=forecast_monthly.index, y=forecast_monthly['yhat_lower'], fill=None, mode='lines',
+            line_color='rgba(0,0,0,0)', showlegend=False
+        ))
+        fig.add_trace(go.Scatter(
+            x=forecast_monthly.index, y=forecast_monthly['yhat_upper'], fill='tonexty', mode='lines',
+            line_color='rgba(0,0,255,0.2)', name='Confidence Interval'
+        ))
+
+        fig.update_layout(
+            title=f"{selected_cat} Demand Forecast (Jan–Mar 2025)",
+            yaxis_title='Units Sold',
+            showlegend=True
+        )
         st.plotly_chart(fig, use_container_width=True)
+
+        # Table: Forecast values with thresholds
+        forecast_table = forecast_monthly[['yhat', 'yhat_lower', 'yhat_upper']].copy()
+        forecast_table = forecast_table.rename(columns={
+            'yhat': 'Forecast',
+            'yhat_lower': 'Min Threshold',
+            'yhat_upper': 'Max Threshold'
+        })
+        forecast_table.index.name = 'Month'
+        st.markdown("### Forecast Table with Min/Max Thresholds")
+        st.dataframe(forecast_table.style.format("{:.0f}"))
+        
     else:
         st.warning("⚠️ Not enough data for forecasting.")
+
+
 
 elif plot_type == "Investment Status":
     total_revenue = df['Revenue'].sum()
     total_profit = df['Profit'].sum()
-    initial_investment = 200000000
+    initial_investment = 200_000_000
     shortfall = initial_investment - total_profit
 
     st.header("Investment Status")
