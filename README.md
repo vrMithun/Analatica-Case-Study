@@ -1,76 +1,48 @@
 # Analytica: Urban Grocers Data Analysis
-### *A Project for the Unstop Data Science Competition*
+### A Data Science Analysis for the Unstop Competition
+
+**📊 Explore the Dashboard:** [View Dashboard](https://molesdash.streamlit.app/)  
+**📄 Complete Analysis (PPT):** [Download PPT](https://github.com/vrMithun/Analatica-Case-Study/raw/refs/heads/main/ANALYTICA_MOLES_JEI%20AKASH.pptx)
 
 ## 1. Project Overview
 
-This project provides an in-depth analysis of the sales data for Urban Grocers Pvt. Ltd. The goal is to evaluate the success of the new management's strategy over two years in the Hyderabad market. By leveraging a comprehensive dataset of daily transactions, this analysis identifies key trends, quantifies the impact of promotions, and provides data-driven recommendations to optimize business operations, improve profitability, and enhance customer satisfaction.
+This analysis evaluates the sales performance of **Urban Grocers Pvt. Ltd.** over two years in the **Hyderabad market**. Using a dataset of daily transactions, the study identifies key trends, measures the impact of promotions, and provides actionable insights to improve operations, profitability, and customer satisfaction.
 
----
+
 
 ## 2. Dataset and Features
 
-The analysis is based on a dataset containing 240,000 transaction-level records from 2023 and 2024.
+The dataset contains **240,000 transaction-level records** from 2023 and 2024.
 
-| Feature           | Description                                     | Data Type    |
-|-------------------|-------------------------------------------------|--------------|
-| `Date`            | The day of the transaction                      | Date         |
-| `Store_ID`        | Supermarket identifier (A, B, C, D)             | Categorical  |
-| `Transaction_ID`  | Unique transaction identifier                   | Numeric      |
-| `Food_Category`   | Bread, Milk, Fruits, Vegetables, Meat           | Categorical  |
-| `Units_Sold`      | Number of units sold in the transaction         | Numeric      |
-| `Price_per_Unit`  | Price of a single unit                          | Numeric      |
-| `Promotion`       | Binary flag (0 = No, 1 = Yes)                   | Binary       |
-| `Holiday_Weekend` | Binary flag (0 = No, 1 = Yes)                   | Binary       |
-| `Weather`         | Weather condition (Sunny, Rainy, Cloudy)        | Categorical  |
-| `Mode_Purchase`   | Payment method (Cash, UPI, Credit Card, Debit Card) | Categorical  |
+| Feature           | Description                                                                 | Data Type    |
+|------------------|----------------------------------------------------------------------------|-------------|
+| `Date`            | Transaction date                                                           | Date        |
+| `Store_ID`        | Supermarket identifier (A, B, C, D)                                       | Categorical |
+| `Transaction_ID`  | Unique transaction identifier                                              | Numeric     |
+| `Food_Category`   | Product category (Bread, Milk, Fruits, Vegetables, Meat)                  | Categorical |
+| `Units_Sold`      | Number of units sold                                                      | Numeric     |
+| `Price_per_Unit`  | Price per unit                                                            | Numeric     |
+| `Promotion`       | Flag indicating promotion (0 = No, 1 = Yes)                                | Binary      |
+| `Holiday_Weekend` | Flag for holiday/weekend (0 = No, 1 = Yes)                                 | Binary      |
+| `Weather`         | Weather condition (Sunny, Rainy, Cloudy)                                   | Categorical |
+| `Mode_Purchase`   | Payment method (Cash, UPI, Credit Card, Debit Card)                        | Categorical |
 
----
 
-## 3. Key Questions Addressed
+## 3. Key Insights
 
-The analysis is structured to answer the core questions posed by the Urban Grocers management team:
+- **Peak Sales Periods:** Identify high-sales days, weeks, and months.  
+- **Promotion Effectiveness:** Evaluate how promotions impact sales.  
+- **Holiday & Weekend Impact:** Understand which categories see sales uplift.  
+- **Volatile Stores:** Determine stores with unpredictable demand.  
+- **Demand Forecasting:** Predict future sales trends for key categories.  
+- **Investment Analysis:** Assess the ₹20 crore investment against generated profit.
 
-* **Peak Sales Periods:** Identification of peak sales days, weeks, and months.
-* **Holiday & Weekend Impact:** Quantification of how holidays and weekends affect sales volume across different product categories.
-* **Unpredictable Demand:** Identification of the store with the most volatile and unpredictable sales patterns.
-* **Promotion Effectiveness:** A quantified analysis of whether promotions successfully increased sales.
-* **Demand Patterns & Forecasting:** A detailed look at demand patterns across stores and categories, including a **demand forecast for the next quarter** for a selected category.
-* **Investment Analysis:** An evaluation of the initial ₹20 crore investment against the total profit generated, based on a **14% gross profit margin**.
 
----
 
-## 4. Repository Structure
+## 4. Team Members
 
-* `notebooks/`: Contains the Jupyter notebooks used for data cleaning, EDA, analysis, and modeling.
-* `data/`: The raw `Urban_Grocers.csv.xlsx` dataset.
-* `reports/`: Any generated reports, visualizations, or final presentations.
-* `src/`: Scripts for data preprocessing, analysis functions, etc. (if applicable).
-* `README.md`: This file.
+- [Anuj A](https://github.com/a-anuj)  
+- [Jei Akash](https://github.com/jeiakash)  
+- [Mithun VR](https://github.com/vrMithun)
 
----
 
-## 5. Getting Started
-
-To run this project locally, follow these steps:
-
-1.  Clone the repository:
-    ```bash
-    git clone https://github.com/vrMithun/Analatica-Case-Study.git
-    ```
-2.  Navigate to the project directory:
-    ```bash
-    cd Analatica-Case-Study
-    ```
-3.  Install the required dependencies (assuming you use `pip`):
-    ```bash
-    pip install -r requirements.txt
-    ```
-4.  Launch the Jupyter Notebooks from the `notebooks/` directory to explore the analysis.
-
----
-
-## 6. Author
-
-- [Anuj A](github.com/a-anuj)
-- [Jei Akash](github.com/jeiakash)
-- [Mithun VR](github.com/vrMithun)
