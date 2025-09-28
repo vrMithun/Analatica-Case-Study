@@ -53,6 +53,7 @@ st.sidebar.title("🔎 Explore Analysis")
 plot_type = st.sidebar.radio(
     "Select Analysis",
     [
+        "About the Data",
         "Overall Demand Trends",
         "Revenue Trends",
         "Category Performance",
@@ -77,6 +78,25 @@ if plot_type == "Overall Demand Trends":
     fig = px.line(monthly_sales, x="Month", y="Units_Sold", markers=True,
                   title="Overall Monthly Units Sold")
     st.plotly_chart(fig, use_container_width=True)
+elif plot_type == "About the Data":
+    st.subheader("📋 About the Dataset")
+
+    # Shape
+    st.write(f"**Number of Rows:** {df.shape[0]}")
+    st.write(f"**Number of Columns:** {df.shape[1]}")
+
+    # Column info
+    st.markdown("### Column Data Types")
+    st.dataframe(df.dtypes.rename("Data Type"))
+
+    # Null values
+    st.markdown("### Missing Values")
+    null_counts = df.isnull().sum()
+    st.dataframe(null_counts.rename("Null Count"))
+
+    # Summary statistics
+    st.markdown("### Summary Statistics")
+    st.dataframe(df.describe().T)
 
 elif plot_type == "Revenue Trends":
     monthly_revenue = df.groupby("Month")["Revenue"].sum().reset_index()
